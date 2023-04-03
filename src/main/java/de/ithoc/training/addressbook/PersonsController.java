@@ -14,15 +14,15 @@ public class PersonsController {
     private final static List<Person> persons = new ArrayList<>();
 
     public PersonsController() {
-        persons.add(new Person(12L, "Dr. Nice"));
-        persons.add(new Person(13L, "Bombasto"));
-        persons.add(new Person(14L, "Celeritas"));
-        persons.add(new Person(15L, "Magneta"));
-        persons.add(new Person(16L, "RubberMan"));
-        persons.add(new Person(17L, "Dynama"));
-        persons.add(new Person(18L, "Dr. IQ"));
-        persons.add(new Person(19L, "Magma"));
-        persons.add(new Person(20L, "Tornado"));
+        persons.add(new Person(12L, "Dr.", "Nice", List.of()));
+        persons.add(new Person(13L, "Bom", "Basto", List.of()));
+        persons.add(new Person(14L, "Cele", "Ritas", List.of()));
+        persons.add(new Person(15L, "Ma", "Gneta", List.of()));
+        persons.add(new Person(16L, "Rubber", "Man", List.of()));
+        persons.add(new Person(17L, "Dy", "Nama", List.of()));
+        persons.add(new Person(18L, "Dr.", "IQ", List.of()));
+        persons.add(new Person(19L, "Mag", "Ma", List.of()));
+        persons.add(new Person(20L, "Tor", "Nado", List.of()));
     }
 
     @GetMapping
@@ -41,10 +41,10 @@ public class PersonsController {
     }
 
     @PostMapping
-    public @ResponseBody Person post(@RequestBody String name) {
+    public @ResponseBody Person post(@RequestBody Person person) {
         Long id = persons.get(persons.size()-1).getId();
         id = id + 1L;
-        Person person = new Person(id, name);
+        person.setId(id);
         persons.add(person);
 
         return person;
@@ -56,6 +56,19 @@ public class PersonsController {
                 .filter(person -> person.getId().equals(id))
                 .findFirst();
         first.ifPresent(persons::remove);
+
+        return null;
+    }
+
+    @PutMapping
+    public @ResponseBody Person put(@RequestBody Person person) {
+        Optional<Person> personToUpdate = persons.stream()
+                .filter(p -> p.getId().equals(person.getId()))
+                .findFirst();
+        if(personToUpdate.isPresent()) {
+            persons.remove(personToUpdate.get());
+            persons.add(person);
+        }
 
         return null;
     }
