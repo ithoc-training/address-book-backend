@@ -42,9 +42,7 @@ public class PersonsController {
 
     @PostMapping
     public @ResponseBody Person post(@RequestBody Person person) {
-        Long id = persons.get(persons.size()-1).getId();
-        id = id + 1L;
-        person.setId(id);
+        person.setId(maxId() + 1);
         persons.add(person);
 
         return person;
@@ -70,7 +68,14 @@ public class PersonsController {
             persons.add(person);
         }
 
-        return null;
+        return person;
+    }
+
+
+    private Long maxId() {
+        return persons.stream()
+                .map(Person::getId)
+                .reduce(Long.MIN_VALUE, Long::max);
     }
 
 }
