@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/persons")
+@CrossOrigin
 public class PersonsController {
 
     private final static List<Person> persons = new ArrayList<>();
