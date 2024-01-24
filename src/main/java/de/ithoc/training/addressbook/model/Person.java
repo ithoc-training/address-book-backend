@@ -8,32 +8,13 @@ import java.util.List;
 
 @NoArgsConstructor
 @Getter
+@Setter
 public class Person {
 
-    @Setter
-    private Long id;
+    private String id;
 
     private String firstName;
     private String lastName;
     private List<Address> addresses;
-
-    public Person(Long id, String firstName, String lastName, List<Address> addresses) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.addresses = addresses;
-    }
-
-    public Person(Long id, String firstName, String lastName) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
-
-    public Person(String firstName, String lastName, List<Address> addresses) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.addresses = addresses;
-    }
 
 }

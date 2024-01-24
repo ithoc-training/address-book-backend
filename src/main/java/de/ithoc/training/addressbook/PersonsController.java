@@ -1,82 +1,76 @@
 package de.ithoc.training.addressbook;
 
 import de.ithoc.training.addressbook.model.Person;
+import de.ithoc.training.addressbook.repository.PersonEntity;
+import de.ithoc.training.addressbook.repository.PersonRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/persons")
 @CrossOrigin
 public class PersonsController {
 
-    private final static List<Person> persons = new ArrayList<>();
+    private final PersonRepository personRepository;
 
-    public PersonsController() {
-        persons.add(new Person(12L, "Dr.", "Nice", List.of()));
-        persons.add(new Person(13L, "Bom", "Basto", List.of()));
-        persons.add(new Person(14L, "Cele", "Ritas", List.of()));
-        persons.add(new Person(15L, "Ma", "Gneta", List.of()));
-        persons.add(new Person(16L, "Rubber", "Man", List.of()));
-        persons.add(new Person(17L, "Dy", "Nama", List.of()));
-        persons.add(new Person(18L, "Dr.", "IQ", List.of()));
-        persons.add(new Person(19L, "Mag", "Ma", List.of()));
-        persons.add(new Person(20L, "Tor", "Nado", List.of()));
+    private final ModelMapper modelMapper = new ModelMapper();
+
+    public PersonsController(PersonRepository personRepository) {
+        this.personRepository = personRepository;
     }
 
     @GetMapping
     public @ResponseBody List<Person> get() {
 
+        List<Person> persons = new ArrayList<>();
+        personRepository.findAll().forEach(personEntity -> {
+            Person person = modelMapper.map(personEntity, Person.class);
+            persons.add(person);
+        });
+
         return persons;
     }
 
     @GetMapping("/{id}")
-    public @ResponseBody Person getById(@PathVariable Long id) {
+    public @ResponseBody Person getById(@PathVariable String id) {
 
-        return persons.stream()
-                .filter(person -> person.getId().equals(id))
-                .findFirst().
-                orElse(null);
+        Optional<PersonEntity> personEntityOptional = personRepository.findById(UUID.fromString(id));
+        if (personEntityOptional.isPresent()) {
+            PersonEntity personEntity = personEntityOptional.get();
+            return modelMapper.map(personEntity, Person.class);
+        }
+
+        return null;
     }
 
     @PostMapping
     public @ResponseBody Person post(@RequestBody Person person) {
-        person.setId(maxId() + 1);
-        persons.add(person);
 
-        return person;
+        PersonEntity personEntity = modelMapper.map(person, PersonEntity.class);
+        personRepository.save(personEntity);
+
+        return modelMapper.map(personEntity, Person.class);
     }
 
     @DeleteMapping("/{id}")
-    public @ResponseBody Void delete(@PathVariable Long id) {
-        Optional<Person> first = persons.stream()
-                .filter(person -> person.getId().equals(id))
-                .findFirst();
-        first.ifPresent(persons::remove);
+    public @ResponseBody Void delete(@PathVariable String id) {
+
+        personRepository.deleteById(UUID.fromString(id));
 
         return null;
     }
 
     @PutMapping
     public @ResponseBody Person put(@RequestBody Person person) {
-        Optional<Person> personToUpdate = persons.stream()
-                .filter(p -> p.getId().equals(person.getId()))
-                .findFirst();
-        if(personToUpdate.isPresent()) {
-            persons.remove(personToUpdate.get());
-            persons.add(person);
-        }
+
+        personRepository.save(modelMapper.map(person, PersonEntity.class));
 
         return person;
-    }
-
-
-    private Long maxId() {
-        return persons.stream()
-                .map(Person::getId)
-                .reduce(Long.MIN_VALUE, Long::max);
     }
 
 }
